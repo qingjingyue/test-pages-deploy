@@ -56,6 +56,12 @@ jobs:
         env:
           NODE_ENV: production
 
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          environment: "production"
+
       - name: Setup Pages 配置 Pages
         uses: actions/configure-pages@v3
 
