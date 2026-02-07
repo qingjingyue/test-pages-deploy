@@ -5,8 +5,9 @@
   "compatibility_date": "2026-02-07",
   // 静态资源绑定
   "site": {
-    "bucket": "./dist",
-    "include": ["**/*"],
-    "exclude": [],
+    "bucket": "./dist", // Vite 构建输出目录
+    "entry-point": "worker", // Worker 代码目录
+    "include": ["**/*"], // 包含所有静态文件
+    "exclude": ["**/*.map"], // 排除 sourcemap
   },
 }
