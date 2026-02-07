@@ -32,8 +32,8 @@ jobs:
       - name: Install pnpm 安装 pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 8
-          run_install: false
+          version: 10
+          run_install: false # 不运行安装依赖，因为我们稍后会手动安装
 
       - name: Get pnpm store directory  获取 pnpm 缓存目录
         shell: bash
