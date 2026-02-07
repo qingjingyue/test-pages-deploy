@@ -28,7 +28,9 @@ onMounted(async () => {
   .about {
     min-height: 100vh;
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
   }
 }
 </style>
