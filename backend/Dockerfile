@@ -18,6 +18,13 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
+# 设置时区为亚洲/上海
+ENV TZ=Asia/Shanghai
+RUN apt-get update && apt-get install -y tzdata && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # 创建非root用户运行应用
 RUN groupadd -r spring && useradd -r -g spring spring
 USER spring:spring

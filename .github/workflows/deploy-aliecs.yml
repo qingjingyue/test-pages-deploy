@@ -162,6 +162,8 @@ jobs:
             # 停止并移除旧容器（如果存在）
             docker stop test-deploy-app || true
             docker rm test-deploy-app || true
+            # 清理旧版本的 test-deploy-backend 镜像
+            docker images -q test-deploy-backend | xargs -r docker rmi -f
             # 加载Docker镜像
             docker load -i test-deploy-backend-${{ needs.build.outputs.image_tag }}.tar
             # 启动新容器
@@ -170,7 +172,5 @@ jobs:
               --network test-pages-deploy_app-network \
               -p 8080:8080 \
               test-deploy-backend:${{ needs.build.outputs.image_tag }}
-            # 清理旧版本的 test-deploy-backend 镜像（保留最新版本）
-            docker images -q test-deploy-backend | tail -n +2 | xargs -r docker rmi -f
             # 输出部署完成信息
             echo "部署完成！"
