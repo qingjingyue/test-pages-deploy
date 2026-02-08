@@ -50,12 +50,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      # 步骤5：构建Docker镜像并保存为tar文件
+      # 步骤5：确保缓存目录存在
+      - name: 确保缓存目录存在
+        run: mkdir -p /tmp/.buildx-cache
+
+      # 步骤6：构建Docker镜像并保存为tar文件
       - name: 构建Docker镜像
         working-directory: ./backend
         run: |
-          # 构建镜像，使用生成的标签和缓存
+          # 构建镜像，使用生成的标签、缓存并加载到Docker守护进程
           docker buildx build \
+            --load \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
             --build-arg BUILDKIT_INLINE_CACHE=1 \
@@ -64,13 +69,13 @@ jobs:
           # 将镜像保存为tar文件，以便后续上传
           docker save -o test-deploy-backend-${{ steps.generate-tag.outputs.image_tag }}.tar test-deploy-backend:${{ steps.generate-tag.outputs.image_tag }}
 
-      # 步骤6：移动新缓存到缓存目录
+      # 步骤7：移动新缓存到缓存目录
       - name: 移动新缓存到缓存目录
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-      # 步骤7：上传Docker镜像作为构建产物
+      # 步骤8：上传Docker镜像作为构建产物
       - name: 上传Docker镜像产物
         uses: actions/upload-artifact@v4
         with:
