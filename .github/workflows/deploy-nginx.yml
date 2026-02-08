@@ -2,7 +2,7 @@ name: Deploy Nginx to AliECS
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
     paths:
       - "frontend/**"
   workflow_dispatch:
@@ -50,8 +50,8 @@ jobs:
 
       - name: 构建项目
         run: pnpm run build
-        # env:
-        #   NODE_ENV: production
+        env:
+          NODE_ENV: nginx
 
       - name: 打包构建产物和 nginx 配置
         run: |

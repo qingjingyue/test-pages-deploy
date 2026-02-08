@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import {onMounted, ref} from "vue";
 
 const count = ref<number>(0);
 const loading = ref<boolean>(true);
@@ -12,16 +12,16 @@ onMounted(() => {
 function updateCount() {
   loading.value = true;
   fetch("/count")
-    .then((response) => response.json())
-    .then((data) => {
-      count.value = data;
-      loading.value = false;
-    })
-    .catch((err) => {
-      console.error("获取访问次数失败:", err);
-      error.value = "获取失败";
-      loading.value = false;
-    });
+      .then((response) => response.json())
+      .then((data) => {
+        count.value = data;
+        loading.value = false;
+      })
+      .catch((err) => {
+        console.error("获取访问次数失败:", err);
+        error.value = "获取失败";
+        loading.value = false;
+      });
 }
 </script>
 
@@ -33,7 +33,7 @@ function updateCount() {
     <div class="count-container">
       <h2>访问次数统计</h2>
       <div class="count-value">
-        <span v-if="loading">加载中...</span>
+        <span v-if="loading">加载中......</span>
         <span v-else-if="error">{{ error }}</span>
         <span v-else>{{ count }}</span>
       </div>
