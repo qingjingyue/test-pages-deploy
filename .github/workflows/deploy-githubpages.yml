@@ -19,14 +19,13 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: 进入frontend目录
-        run: |
-          cd frontend
 
       - name: Setup Node.js 环境
         uses: actions/setup-node@v4
@@ -48,7 +47,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('frontend/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
@@ -67,7 +66,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # 上传 dist 目录内容
-          path: "./dist"
+          path: "./frontend/dist"
 
   deploy: # Job 名称，这个 job 负责部署到 GitHub Pages
     environment: # 定义部署环境
