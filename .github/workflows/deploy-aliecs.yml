@@ -2,7 +2,9 @@ name: Deploy to AliECS
 
 on:
   push:
-    branches: [main] # 当推送到 main 分支时触发，可根据需要修改为 master
+    branches: [main] # 当推送到 main 分支时触发
+    paths:
+      - "backend/**" # 只在 backend 目录下的文件变更时触发
   workflow_dispatch: # 允许手动触发
 
 # 设置权限

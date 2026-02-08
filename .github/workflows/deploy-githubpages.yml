@@ -3,6 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main] # 当推送到 main 分支时触发，可根据需要修改为 master
+    paths:
+      - "frontend/**" # 只在 frontend 目录下的文件变更时触发
   workflow_dispatch: # 允许手动触发
 
 # 设置权限
@@ -21,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: frontend
+        working-directory: frontend # 切换到前端项目目录
 
     steps:
       - name: Checkout
