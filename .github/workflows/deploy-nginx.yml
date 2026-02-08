@@ -1,0 +1,122 @@
+name: Deploy Nginx to AliECS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Node.js 环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+          run_install: false
+
+      - name: 获取 pnpm 缓存目录
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: 设置 pnpm 缓存
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: 安装依赖
+        run: pnpm install
+
+      - name: 构建项目
+        run: pnpm run build
+        # env:
+        #   NODE_ENV: production
+
+      - name: 打包构建产物和 nginx 配置
+        run: |
+          mkdir -p deploy-package
+          cp -r dist deploy-package/
+          cp nginx.conf deploy-package/
+          cd deploy-package
+          tar -czf nginx-deploy.tar.gz *
+
+      - name: 上传部署包
+        uses: actions/upload-artifact@v4
+        with:
+          name: nginx-deploy-package
+          path: ./frontend/deploy-package/nginx-deploy.tar.gz
+          retention-days: 1
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 下载部署包
+        uses: actions/download-artifact@v4
+        with:
+          name: nginx-deploy-package
+          path: .
+
+      - name: 准备远程服务器
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          port: ${{ secrets.SERVER_PORT }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            mkdir -p /root/test/test-pages-deploy/frontend
+            rm -f /root/test/test-pages-deploy/frontend/nginx-deploy.tar.gz
+
+      - name: 复制部署包到远程服务器
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          port: ${{ secrets.SERVER_PORT }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: nginx-deploy.tar.gz
+          target: /root/test/test-pages-deploy/frontend/
+
+      - name: 在远程服务器上部署 nginx
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          port: ${{ secrets.SERVER_PORT }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            # 进入前端目录
+            cd /root/test/test-pages-deploy/frontend
+            # 解压部署包
+            tar -xzf nginx-deploy.tar.gz
+            # 覆盖html目录
+            rm -rf ./html/*
+            cp -r dist/* ./html/
+            # 替换nginx.conf
+            cp nginx.conf ./nginx/nginx.conf
+            # 重启nginx
+            docker restart test-nginx || true
+            echo "Nginx 部署完成！"
