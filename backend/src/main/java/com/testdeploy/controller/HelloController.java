@@ -1,6 +1,5 @@
 package com.testdeploy.controller;
 
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,4 +15,10 @@ public class HelloController {
                 <p> 这是第 %d 次访问 </p>
                 """.formatted(++i);
     }
+
+    @GetMapping("/count")
+    public int count() {
+        return ++i;
+    }
+
 }
