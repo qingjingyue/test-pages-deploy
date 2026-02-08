@@ -11,6 +11,9 @@ public class HelloController {
 
     @GetMapping("/hello")
     public String hello() {
-        return " Hello World! " + ++i;
+        return """
+                <h1> Hello World! </h1>
+                <p> 这是第 %d 次访问 </p>
+                """.formatted(++i);
     }
 }
